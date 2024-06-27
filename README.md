@@ -1,4 +1,4 @@
-# ETH-price-prediction-allora
+# Basic ETH Price Prediction Node
 
 This repository provides an example Allora network worker node designed to offer price predictions for Ethereum (ETH). It demonstrates the utilization of a basic inference model operating within a dedicated container and showcases its seamless integration with the Allora network infrastructure, enabling it to contribute with valuable inferences.
 
@@ -27,9 +27,26 @@ This script combines the Allora inference base, node function, and custom logic.
 The scripts utilize environment variables for configuration:
 - `INFERENCE_API_ADDRESS`: The address of the inference API.
 
-## Usage
+## Docker Compose
 
-### Running the Inference Service
-To start the Flask app for generating inferences and updating the model:
+### Building and Running the Services
+
+#### Build the Docker images
 ```bash
-python app.py
+docker-compose build
+```
+
+#### Start the services
+```bash
+docker-compose up -d
+```
+
+#### View the logs
+```bash
+docker-compose logs -f
+```
+
+#### Stop the services
+```bash
+docker-compose down
+```
