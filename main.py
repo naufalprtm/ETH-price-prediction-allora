@@ -35,30 +35,36 @@ def process(token_name, data_source):
         logging.error(f"Error making request to inference API: {e}")
         raise
 
+def get_env_var(var_name, default_value=None):
+    value = os.getenv(var_name)
+    if value is None and default_value is None:
+        logging.error(f"{var_name} environment variable not set.")
+        sys.exit(1)
+    return value or default_value
+
 if __name__ == "__main__":
-    # Check and parse command line arguments
-    if len(sys.argv) < 6:
+    # Retrieve arguments from environment variables or command line
+    try:
+        topic_id = get_env_var("TOPIC_ID", sys.argv[1] if len(sys.argv) > 1 else None)
+        blockHeight = get_env_var("ALLORA_BLOCK_HEIGHT_CURRENT", sys.argv[2] if len(sys.argv) > 2 else None)
+        blockHeightEval = sys.argv[3] if len(sys.argv) > 3 else None
+        default_arg = sys.argv[4] if len(sys.argv) > 4 else None
+        data_source = sys.argv[5] if len(sys.argv) > 5 else None
+
+        logging.info(f"Received arguments: topic_id={topic_id}, blockHeight={blockHeight}, blockHeightEval={blockHeightEval}, default_arg={default_arg}, data_source={data_source}")
+
+        response_inference = process(token_name=default_arg, data_source=data_source)
+        response_dict = {"infererValue": response_inference}
+        value = json.dumps(response_dict)
+        logging.info(f"Processed inference successfully. Response: {response_dict}")
+    except IndexError:
         value = json.dumps({
             "error": f"Not enough arguments provided: {len(sys.argv) - 1}, expected 5 arguments: topic_id, blockHeight, blockHeightEval, default_arg, data_source"
         })
         logging.error(f"Not enough arguments provided: {len(sys.argv) - 1}, expected 5 arguments.")
-    else:
-        try:
-            topic_id = sys.argv[1]
-            blockHeight = sys.argv[2]
-            blockHeightEval = sys.argv[3]
-            default_arg = sys.argv[4]
-            data_source = sys.argv[5]
-
-            logging.info(f"Received arguments: topic_id={topic_id}, blockHeight={blockHeight}, blockHeightEval={blockHeightEval}, default_arg={default_arg}, data_source={data_source}")
-
-            response_inference = process(token_name=default_arg, data_source=data_source)
-            response_dict = {"infererValue": response_inference}
-            value = json.dumps(response_dict)
-            logging.info(f"Processed inference successfully. Response: {response_dict}")
-        except Exception as e:
-            logging.error(f"Error processing inference: {e}")
-            value = json.dumps({"error": str(e)})
+    except Exception as e:
+        logging.error(f"Error processing inference: {e}")
+        value = json.dumps({"error": str(e)})
 
     print(value)
     logging.info("Script execution completed.")
